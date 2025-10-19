@@ -1,0 +1,31 @@
+name: Auto Update README
+
+on:
+  schedule:
+    - cron: "0 8 * * *"  # runs every day at 08:00 UTC
+  workflow_dispatch:     # allows manual trigger
+
+jobs:
+  update-readme:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Update README with current date
+        run: |
+          echo "Updating README..."
+          echo "Last updated on $(date -u)" > date.txt
+          cat README.md > temp.md
+          echo "" >> temp.md
+          echo "---" >> temp.md
+          echo "🕒 Auto-updated by GitHub Actions on $(date -u)" >> temp.md
+          mv temp.md README.md
+
+      - name: Commit changes
+        run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "github-actions"
+          git add README.md
+          git commit -m "Auto update README" || echo "No changes to commit"
+          git push
